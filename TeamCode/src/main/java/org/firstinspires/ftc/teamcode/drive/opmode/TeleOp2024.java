@@ -16,6 +16,7 @@ public class TeleOp2024 extends LinearOpMode {
     //private DcMotor revArm = null;
     private DcMotor rightRear = null;
     private DcMotor lift = null;
+    private DcMotor slide = null;
     private Servo claw = null;
     private boolean resetting = false;
 
@@ -47,6 +48,13 @@ public class TeleOp2024 extends LinearOpMode {
         lift.setPower(-power);
     }
 
+    public void slideUp() {
+        slide.setPower(0.25);
+    }
+    public void slideDown() {
+        slide.setPower(-0.25);
+    }
+
     public void clawOpen() {
         claw.setPosition(.5);
     }
@@ -73,7 +81,11 @@ public class TeleOp2024 extends LinearOpMode {
         lift = hardwareMap.get(DcMotor.class, "lift");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+        slide = hardwareMap.get(DcMotor.class, "slide");
+        slide.setDirection(DcMotor.Direction.REVERSE);
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         claw = hardwareMap.get(Servo.class, "claw");
 
@@ -95,12 +107,20 @@ public class TeleOp2024 extends LinearOpMode {
         while (opModeIsActive()) {
 
           movement();
-          if (gamepad1.left_trigger > 0 && (lift.getCurrentPosition() < 0 && !resetting)) {
+          if (gamepad1.left_trigger > 0) {
               liftUp(gamepad1.left_trigger);
-          } else if (gamepad1.right_trigger > 0 && (lift.getCurrentPosition() > -7130 && !resetting)) {
+          } else if (gamepad1.right_trigger > 0) {
               liftDown(gamepad1.right_trigger);
           } else {
               lift.setPower(0);
+          }
+
+          if (gamepad1.right_bumper) {
+              slideUp();
+          } else if (gamepad1.left_bumper) {
+              slideDown();
+          } else {
+              slide.setPower(0);
           }
 
 //          if (gamepad1.options) {
@@ -118,6 +138,7 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (gamepad1.cross) {
               clawClose();
           }
+
           telemetry.addData("Position", lift.getCurrentPosition());
           telemetry.update();
         }
