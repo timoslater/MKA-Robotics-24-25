@@ -18,6 +18,7 @@ public class TeleOp2024 extends LinearOpMode {
     private DcMotor lift = null;
     private DcMotor slide = null;
     private Servo claw = null;
+    private Servo rotate = null;
     private boolean resetting = false;
 
     public void movement() {
@@ -63,6 +64,12 @@ public class TeleOp2024 extends LinearOpMode {
         claw.setPosition(.84);
     }
 
+    public void rotateClawR() {
+        rotate.setPosition(rotate.getPosition()+.002);
+    }
+    public void rotateClawL() {
+        rotate.setPosition(rotate.getPosition()-.002);
+    }
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized", "haggis");
@@ -89,8 +96,7 @@ public class TeleOp2024 extends LinearOpMode {
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         claw = hardwareMap.get(Servo.class, "claw");
-
-
+        rotate = hardwareMap.get(Servo.class,"rotate");
 
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
@@ -139,7 +145,11 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (gamepad1.cross) {
               clawClose();
           }
-
+          if (gamepad1.square){
+              rotateClawR();
+          } else if(gamepad1.circle){
+              rotateClawL();
+          }
           telemetry.addData("Position", lift.getCurrentPosition());
           telemetry.update();
         }
