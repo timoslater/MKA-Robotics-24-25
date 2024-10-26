@@ -115,17 +115,18 @@ public class TeleOp2024 extends LinearOpMode {
         while (opModeIsActive()) {
 
           movement();
-          if (gamepad1.left_trigger > 0) {
-              liftUp(gamepad1.left_trigger);
-          } else if (gamepad1.right_trigger > 0) {
-              liftDown(gamepad1.right_trigger);
+
+          if (gamepad2.left_trigger > 0) {
+              liftUp(gamepad2.left_trigger);
+          } else if (gamepad2.right_trigger > 0) {
+              liftDown(gamepad2.right_trigger);
           } else {
               lift.setPower(0);
           }
 
-          if (gamepad1.right_bumper) {
+          if (gamepad2.right_bumper) {
               slideUp();
-          } else if (gamepad1.left_bumper) {
+          } else if (gamepad2.left_bumper) {
               slideDown();
           } else {
               slide.setPower(0);
@@ -141,14 +142,14 @@ public class TeleOp2024 extends LinearOpMode {
 //              }
 //          }
 
-          if (gamepad1.triangle) {
+          if (gamepad2.triangle) {
               clawOpen();
-          } else if (gamepad1.cross) {
+          } else if (gamepad2.cross) {
               clawClose();
           }
-          if (gamepad1.square){
+          if (gamepad2.square){
               rotateClawR();
-          } else if(gamepad1.circle){
+          } else if(gamepad2.circle){
               rotateClawL();
           }
           telemetry.addData("Position", lift.getCurrentPosition());
