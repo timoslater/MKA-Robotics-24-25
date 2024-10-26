@@ -50,10 +50,11 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void slideUp() {
-        slide.setPower(0.25);
+        slide.setPower(0.5);
     }
     public void slideDown() {
-        slide.setPower(-0.25);
+        slide.setPower(-0.5
+        );
     }
 
     public void clawOpen() {
@@ -65,10 +66,10 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void rotateClawR() {
-        rotate.setPosition(rotate.getPosition()+.002);
+        rotate.setPosition(rotate.getPosition()+.001);
     }
     public void rotateClawL() {
-        rotate.setPosition(rotate.getPosition()-.002);
+        rotate.setPosition(rotate.getPosition()-.001);
     }
     @Override
     public void runOpMode() {
