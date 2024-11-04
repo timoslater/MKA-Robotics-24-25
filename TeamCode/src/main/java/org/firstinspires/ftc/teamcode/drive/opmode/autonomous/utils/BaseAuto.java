@@ -7,81 +7,68 @@ import com.acmerobotics.roadrunner.Action;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.drive.opmode.autonomous.BlueClose;
 
 public abstract class BaseAuto extends LinearOpMode {
-    public class Lift {
+    public class Arm {
         private DcMotorEx lift;
+        private DcMotorEx slide;
 
-        public Lift(HardwareMap hardwareMap) {
-            lift = hardwareMap.get(DcMotorEx.class, "liftMotor");
+        public Arm(HardwareMap hardwareMap) {
+            lift = hardwareMap.get(DcMotorEx.class, "lift");
+            slide = hardwareMap.get(DcMotorEx.class, "slide");
+
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotor.Direction.FORWARD);
+
+            slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            slide.setDirection(DcMotor.Direction.REVERSE);
         }
 
-        public class LiftUp implements Action {
+        public class ArmDown implements Action {
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    lift.setPower(0.8);
-                    initialized = true;
-                }
-
-                double pos = lift.getCurrentPosition();
-                packet.put("liftPos", pos);
-                if (pos < 3000.0) {
-                    return true;
-                } else {
-                    lift.setPower(0);
-                    return false;
-                }
+                // placeholder for motor movement code
+                return false;
             }
         }
-        public Action liftUp() {
-            return new LiftUp();
+        public Action armDown() {
+            return new ArmDown();
         }
 
-        public class LiftDown implements Action {
+        public class ArmUp implements Action {
             private boolean initialized = false;
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (!initialized) {
-                    lift.setPower(-0.8);
-                    initialized = true;
-                }
-
-                double pos = lift.getCurrentPosition();
-                packet.put("liftPos", pos);
-                if (pos > 100.0) {
-                    return true;
-                } else {
-                    lift.setPower(0);
-                    return false;
-                }
+                // placeholder for motor movement code
+                return false;
             }
         }
-        public Action liftDown(){
-            return new LiftDown();
+        public Action armUp(){
+            return new ArmUp();
         }
     }
 
     public class Claw {
-        private Servo claw;
+        private Servo grabber;
+        private Servo rotator;
 
         public Claw(HardwareMap hardwareMap) {
-            claw = hardwareMap.get(Servo.class, "claw");
+            grabber = hardwareMap.get(Servo.class, "grabber");
+            rotator = hardwareMap.get(Servo.class, "rotator");
         }
 
         public class CloseClaw implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                claw.setPosition(0.55);
+                grabber.setPosition(0.84);
                 return false;
             }
         }
@@ -92,12 +79,29 @@ public abstract class BaseAuto extends LinearOpMode {
         public class OpenClaw implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                claw.setPosition(1.0);
+                grabber.setPosition(0.5);
                 return false;
             }
         }
         public Action openClaw() {
             return new OpenClaw();
+        }
+
+        public class RotateClawTo implements Action {
+
+            double targetPosition;
+
+            public RotateClawTo(double targetPosition) {
+                this.targetPosition = targetPosition;
+            }
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                rotator.setPosition(this.targetPosition);
+                return false;
+            }
+        }
+        public Action rotateClawTo(double targetPosition) {
+            return new RotateClawTo(targetPosition);
         }
     }
 }
