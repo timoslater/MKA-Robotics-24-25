@@ -96,8 +96,8 @@ public class TeleOp2024 extends LinearOpMode {
         slide.setDirection(DcMotor.Direction.REVERSE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        claw = hardwareMap.get(Servo.class, "claw");
-        rotate = hardwareMap.get(Servo.class,"rotate");
+        claw = hardwareMap.get(Servo.class, "grabber");
+        rotate = hardwareMap.get(Servo.class,"rotator");
 
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
