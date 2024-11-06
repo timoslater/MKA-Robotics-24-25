@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -20,6 +21,8 @@ public class TeleOp2024 extends LinearOpMode {
     private Servo claw = null;
     private Servo rotate = null;
     private boolean resetting = false;
+    private Gamepad driveGamepad = null;
+    private Gamepad armGamepad = null;
 
     public void movement() {
         double modifier = 1;//nearBoard ? 0.65 : 1;
@@ -27,10 +30,10 @@ public class TeleOp2024 extends LinearOpMode {
         double Rpower = .517; //0.52*modifier;//*modifier;
         boolean reverseStick = true;
 
-        double r = Lpower * Math.hypot((!reverseStick) ? gamepad1.left_stick_x : gamepad1.right_stick_x, (!reverseStick) ? -gamepad1.left_stick_y : -gamepad1.right_stick_y);
-        double robotAngle = Math.atan2((!reverseStick) ? -gamepad1.left_stick_y : -gamepad1.right_stick_y, (!reverseStick) ? gamepad1.left_stick_x : gamepad1.right_stick_x) + 3 * Math.PI / 4;
-        double rightX = Rpower * ((!reverseStick) ? gamepad1.right_stick_x : gamepad1.left_stick_x) * 1;
-        double rightY = Rpower * ((!reverseStick) ? gamepad1.right_stick_y : gamepad1.left_stick_y) * 1;
+        double r = Lpower * Math.hypot((!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x, (!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y);
+        double robotAngle = Math.atan2((!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y, (!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x) + 3 * Math.PI / 4;
+        double rightX = Rpower * ((!reverseStick) ? driveGamepad.right_stick_x : driveGamepad.left_stick_x) * 1;
+        double rightY = Rpower * ((!reverseStick) ? driveGamepad.right_stick_y : driveGamepad.left_stick_y) * 1;
         double v1 = r * Math.cos(robotAngle) - rightX + rightY;
         double v2 = r * Math.sin(robotAngle) + rightX + rightY;
         double v3 = r * Math.sin(robotAngle) - rightX + rightY;
@@ -86,6 +89,11 @@ public class TeleOp2024 extends LinearOpMode {
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
 
+        leftFront.setDirection(DcMotor.Direction.FORWARD);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        leftRear.setDirection(DcMotor.Direction.FORWARD);
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
+
         lift = hardwareMap.get(DcMotor.class, "lift");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -99,10 +107,9 @@ public class TeleOp2024 extends LinearOpMode {
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
 
-        leftFront.setDirection(DcMotor.Direction.FORWARD);
-        rightFront.setDirection(DcMotor.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.FORWARD);
-        rightRear.setDirection(DcMotor.Direction.REVERSE);
+        driveGamepad = gamepad1;
+
+
 
 
 
@@ -116,23 +123,26 @@ public class TeleOp2024 extends LinearOpMode {
 
           movement();
 
-          if (gamepad2.left_trigger > 0) {
-              liftUp(gamepad2.left_trigger);
-          } else if (gamepad2.right_trigger > 0) {
-              liftDown(gamepad2.right_trigger);
+          armGamepad = gamepad2.getGamepadId() == -1 ? gamepad1 : gamepad2;
+
+
+          if (armGamepad.left_trigger > 0) {
+              liftUp(armGamepad.left_trigger);
+          } else if (armGamepad.right_trigger > 0) {
+              liftDown(armGamepad.right_trigger);
           } else {
               lift.setPower(0);
           }
 
-          if (gamepad2.right_bumper) {
+          if (armGamepad.right_bumper) {
               slideUp();
-          } else if (gamepad2.left_bumper) {
+          } else if (armGamepad.left_bumper) {
               slideDown();
           } else {
               slide.setPower(0);
           }
 
-//          if (gamepad1.options) {
+//          if (driveGamepad.options) {
 //              if (resetting) {
 //                  lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //                  lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -142,14 +152,14 @@ public class TeleOp2024 extends LinearOpMode {
 //              }
 //          }
 
-          if (gamepad2.triangle) {
+          if (armGamepad.triangle) {
               clawOpen();
-          } else if (gamepad2.cross) {
+          } else if (armGamepad.cross) {
               clawClose();
           }
-          if (gamepad2.square){
+          if (armGamepad.square){
               rotateClawR();
-          } else if(gamepad2.circle){
+          } else if(armGamepad.circle){
               rotateClawL();
           }
           telemetry.addData("Position", lift.getCurrentPosition());
