@@ -17,8 +17,10 @@ public class TeleOp2024 extends LinearOpMode {
     private DcMotor rightRear = null;
     private DcMotor lift = null;
     private DcMotor slide = null;
+    private DcMotor specimen = null;
     private Servo claw = null;
     private Servo rotate = null;
+    private Servo clawSpecimen = null;
     private boolean resetting = false;
 
     public void movement() {
@@ -57,12 +59,26 @@ public class TeleOp2024 extends LinearOpMode {
         );
     }
 
+    public void specimenUp(){
+        specimen.setPower(0.75);
+    }
+    public void specimenDown(){
+        specimen.setPower(-0.75);
+    }
+
     public void clawOpen() {
         claw.setPosition(.3);
     }
 
     public void clawClose() {
         claw.setPosition(.64);
+    }
+
+    public void claw2Open(){
+        clawSpecimen.setPosition(.3);
+    }
+    public void claw2Close(){
+        clawSpecimen.setPosition(.64);
     }
 
     public void rotateClawR() {
@@ -96,8 +112,12 @@ public class TeleOp2024 extends LinearOpMode {
         slide.setDirection(DcMotor.Direction.REVERSE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        specimen = hardwareMap.get(DcMotor.class, "specimen");
+        slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
+        clawSpecimen = hardwareMap.get(Servo.class, "clawSpecimen");
 
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         rightFront.setDirection(DcMotor.Direction.REVERSE);
@@ -147,11 +167,27 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (gamepad2.cross) {
               clawClose();
           }
-          if (gamepad2.square){
+          if (gamepad2.dpad_right){
               rotateClawR();
-          } else if(gamepad2.circle){
+          } else if(gamepad2.dpad_left){
               rotateClawL();
           }
+
+          if(gamepad2.dpad_up){
+              specimenUp();
+          } else if(gamepad2.dpad_down){
+              specimenDown();
+          } else{
+              specimen.setPower(0);
+          }
+
+          if(gamepad2.square){
+              claw2Open();
+          } else if(gamepad2.circle){
+              claw2Close();
+          }
+
+
           telemetry.addData("Position", lift.getCurrentPosition());
           telemetry.update();
         }
