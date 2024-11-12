@@ -14,11 +14,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.drive.opmode.autonomous.BlueClose;
 
 public abstract class BaseAuto extends LinearOpMode {
-    public class Arm {
+    public class MainArm {
         private DcMotorEx lift;
         private DcMotorEx slide;
 
-        public Arm(HardwareMap hardwareMap) {
+        public MainArm(HardwareMap hardwareMap) {
             lift = hardwareMap.get(DcMotorEx.class, "lift");
             slide = hardwareMap.get(DcMotorEx.class, "slide");
 
@@ -55,6 +55,19 @@ public abstract class BaseAuto extends LinearOpMode {
             return new ArmUp();
         }
     }
+    public class SideArm {
+        private DcMotorEx lift;
+        private Servo grabber;
+
+        public SideArm(HardwareMap hardwareMap) {
+            lift = hardwareMap.get(DcMotorEx.class, "lift");
+            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lift.setDirection(DcMotor.Direction.FORWARD);
+
+            grabber.setPosition(0.3);
+        }
+    }
+
 
     public class Claw {
         private Servo grabber;

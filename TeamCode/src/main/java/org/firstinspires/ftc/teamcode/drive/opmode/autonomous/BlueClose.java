@@ -27,7 +27,7 @@ public class BlueClose extends BaseAuto {
         Pose2d initialPose = new Pose2d(11.8, 61.7, Math.toRadians(90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Claw claw = new Claw(hardwareMap);
-        Arm lift = new Arm(hardwareMap);
+        MainArm lift = new MainArm(hardwareMap);
 
         TrajectoryActionBuilder path1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(20, 80), Math.PI / 2)
