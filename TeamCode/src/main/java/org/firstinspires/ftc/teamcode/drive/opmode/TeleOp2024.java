@@ -57,10 +57,7 @@ public class TeleOp2024 extends LinearOpMode {
     public void slideUp() {
         slide.setPower(0.75);
     }
-    public void slideDown() {
-        slide.setPower(-0.75
-        );
-    }
+    public void slideDown() { slide.setPower(-0.75); }
 
     public void specimenUp(){
         specimen.setPower(0.75);
@@ -130,12 +127,7 @@ public class TeleOp2024 extends LinearOpMode {
         driveGamepad = gamepad1;
 
 
-
-
-
         waitForStart();
-
-
 
 
         // run until the end of the match (driver presses STOP)
@@ -177,13 +169,13 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (armGamepad.cross) {
               clawClose();
           }
-          if (gamepad2.dpad_right){
+          if (armGamepad.dpad_right){
               rotateClawR();
           } else if(gamepad2.dpad_left){
               rotateClawL();
           }
 
-          if(gamepad2.dpad_up){
+          if(armGamepad.dpad_up){
               specimenUp();
           } else if(gamepad2.dpad_down){
               specimenDown();
@@ -191,14 +183,14 @@ public class TeleOp2024 extends LinearOpMode {
               specimen.setPower(0);
           }
 
-          if(gamepad2.square){
+          if(armGamepad.square){
               claw2Open();
           } else if(gamepad2.circle){
               claw2Close();
           }
 
 
-          telemetry.addData("Position", lift.getCurrentPosition());
+          telemetry.addData("Lift Position", lift.getCurrentPosition());
           telemetry.update();
         }
     }
