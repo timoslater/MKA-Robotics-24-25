@@ -171,7 +171,7 @@ public class TeleOp2024 extends LinearOpMode {
           }
           if (armGamepad.dpad_right){
               rotateClawR();
-          } else if(gamepad2.dpad_left){
+          } else if(armGamepad.dpad_left){
               rotateClawL();
           }
 
