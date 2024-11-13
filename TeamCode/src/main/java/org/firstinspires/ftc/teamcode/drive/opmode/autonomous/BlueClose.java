@@ -26,8 +26,7 @@ public class BlueClose extends BaseAuto {
     public void runOpMode() {
         Pose2d initialPose = new Pose2d(11.8, 61.7, Math.toRadians(90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-        Claw claw = new Claw(hardwareMap);
-        MainArm lift = new MainArm(hardwareMap);
+        SideArm sideArm = new SideArm(hardwareMap);
 
         TrajectoryActionBuilder path1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(20, 80), Math.PI / 2)
@@ -50,6 +49,14 @@ public class BlueClose extends BaseAuto {
         if (isStopRequested()) return;
 
         // start autonomous path
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        sideArm.moveTo(1000, 0.6),
+                        sideArm.openClaw(),
+                        sideArm.closeClaw()
+                )
+        );
 
         /* For Example:
 
