@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 @TeleOp(name = "MAIN", group = "Linear Opmode")
@@ -25,26 +29,60 @@ public class TeleOp2024 extends LinearOpMode {
     private boolean resetting = false;
     private Gamepad driveGamepad = null;
     private Gamepad armGamepad = null;
+    private IMU imu;
 
     public void movement() {
-        double modifier = 1;//nearBoard ? 0.65 : 1;
-        double Lpower = 1*modifier;
-        double Rpower = .517; //0.52*modifier;//*modifier;
-        boolean reverseStick = true;
+        double y = -driveGamepad.right_stick_y; // Remember, Y stick value is reversed
+        double x = driveGamepad.right_stick_x;
+        double rx = driveGamepad.left_stick_x;
 
-        double r = Lpower * Math.hypot((!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x, (!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y);
-        double robotAngle = Math.atan2((!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y, (!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x) + 3 * Math.PI / 4;
-        double rightX = Rpower * ((!reverseStick) ? driveGamepad.right_stick_x : driveGamepad.left_stick_x) * 1;
-        double rightY = Rpower * ((!reverseStick) ? driveGamepad.right_stick_y : driveGamepad.left_stick_y) * 1;
-        double v1 = r * Math.cos(robotAngle) - rightX + rightY;
-        double v2 = r * Math.sin(robotAngle) + rightX + rightY;
-        double v3 = r * Math.sin(robotAngle) - rightX + rightY;
-        double v4 = r * Math.cos(robotAngle) + rightX + rightY;
+        // This button choice was made so that it is hard to hit on accident,
+        // it can be freely changed based on preference.
+        // The equivalent button is start on Xbox-style controllers.
+        if (driveGamepad.share) {
+            imu.resetYaw();
+        }
 
-        leftFront.setPower(v1);
-        rightFront.setPower(v2);
-        leftRear.setPower(v3);
-        rightRear.setPower(v4);
+        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+        // Rotate the movement direction counter to the bot's rotation
+        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+        rotX = rotX * 1.1;  // Counteract imperfect strafing
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        double frontLeftPower = (rotY + rotX + rx) / denominator;
+        double backLeftPower = (rotY - rotX + rx) / denominator;
+        double frontRightPower = (rotY - rotX - rx) / denominator;
+        double backRightPower = (rotY + rotX - rx) / denominator;
+
+        leftFront.setPower(frontLeftPower);
+        rightFront.setPower(frontRightPower);
+        leftRear.setPower(backLeftPower);
+        rightRear.setPower(backRightPower);
+//
+//        double modifier = 1;//nearBoard ? 0.65 : 1;
+//        double Lpower = 1*modifier;
+//        double Rpower = .517; //0.52*modifier;//*modifier;
+//        boolean reverseStick = true;
+//
+//        double r = Lpower * Math.hypot((!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x, (!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y);
+//        double robotAngle = Math.atan2((!reverseStick) ? -driveGamepad.left_stick_y : -driveGamepad.right_stick_y, (!reverseStick) ? driveGamepad.left_stick_x : driveGamepad.right_stick_x) + 3 * Math.PI / 4;
+//        double rightX = Rpower * ((!reverseStick) ? driveGamepad.right_stick_x : driveGamepad.left_stick_x) * 1;
+//        double rightY = Rpower * ((!reverseStick) ? driveGamepad.right_stick_y : driveGamepad.left_stick_y) * 1;
+//        double v1 = r * Math.cos(robotAngle) - rightX + rightY;
+//        double v2 = r * Math.sin(robotAngle) + rightX + rightY;
+//        double v3 = r * Math.sin(robotAngle) - rightX + rightY;
+//        double v4 = r * Math.cos(robotAngle) + rightX + rightY;
+//
+//        leftFront.setPower(v1);
+//        rightFront.setPower(v2);
+//        leftRear.setPower(v3);
+//        rightRear.setPower(v4);
     }
 
     public void liftUp(double power) {
@@ -123,6 +161,14 @@ public class TeleOp2024 extends LinearOpMode {
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
         clawSpecimen = hardwareMap.get(Servo.class, "clawSpecimen");
+
+        imu = hardwareMap.get(IMU.class, "imu");
+// Adjust the orientation parameters to match your robot
+        IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
+        imu.initialize(parameters);
+
 
         driveGamepad = gamepad1;
 
