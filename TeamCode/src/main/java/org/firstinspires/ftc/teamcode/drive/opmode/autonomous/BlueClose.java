@@ -20,12 +20,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import java.util.Vector;
+
 @Config
 @Autonomous(name = "Blue Close", group = "Autonomous")
 public class BlueClose extends BaseAuto {
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(11.8, 61.7, Math.toRadians(90));
+        Pose2d initialPose = new Pose2d(-11.8, 61.7, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         SideArm sideArm = new SideArm(hardwareMap);
 
@@ -35,9 +37,9 @@ public class BlueClose extends BaseAuto {
         Action toRungAction = toRung.build();
 
         TrajectoryActionBuilder afterRung = toRung.fresh()
-                .lineToY(50)
+                .strafeTo(new Vector2d(-11.8, 50))
                 .setTangent(0)
-                .lineToX(-34)
+                .strafeTo(new Vector2d(-34, 50))
                 .strafeTo(new Vector2d(-34, 10))
                 .strafeTo(new Vector2d(-45.5, 10))
                 .strafeTo(new Vector2d(-45.5, 57))
@@ -52,7 +54,8 @@ public class BlueClose extends BaseAuto {
 
         Action afterRungAction = afterRung.build();
 
-
+        sideArm.closeClaw();
+        sideArm.resetEncoder();
 
 
 
@@ -64,8 +67,6 @@ public class BlueClose extends BaseAuto {
 
         while (!isStopRequested() && !opModeIsActive()) {
             // in between initialization and match start
-            sideArm.closeClaw();
-            sideArm.resetEncoder();
         }
 
         waitForStart();
@@ -85,12 +86,10 @@ public class BlueClose extends BaseAuto {
 //                        afterRungAction
 //                )
 //        );
+        //1400
         Actions.runBlocking(
                 new SequentialAction(
-                        new ParallelAction(
-                                sideArm.moveTo(1000, 0.6),
-                                toRungAction
-                        )
+                                sideArm.moveTo(2400, 0.6)
                 )
         );
 

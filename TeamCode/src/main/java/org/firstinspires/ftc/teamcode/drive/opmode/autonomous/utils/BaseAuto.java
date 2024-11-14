@@ -67,11 +67,9 @@ public abstract class BaseAuto extends LinearOpMode {
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotor.Direction.FORWARD);
             lift.setTargetPosition(0);
-            lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
+            lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
-
-            grabber.setPosition(0.64);
+            this.closeClaw();
         }
         public class ResetEncoder implements Action {
             @Override
@@ -80,7 +78,7 @@ public abstract class BaseAuto extends LinearOpMode {
                 lift.setDirection(DcMotor.Direction.FORWARD);
                 lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 lift.setTargetPosition(0);
-                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 return false;
             }
         }
@@ -129,10 +127,10 @@ public abstract class BaseAuto extends LinearOpMode {
                 packet.put("liftPos", pos);
 
                 if (Math.abs(targetPos - pos) < 30) {
-                    return true;
+                    return false;
                 } else {
                     lift.setPower(0);
-                    return false;
+                    return true;
                 }
             }
         }
