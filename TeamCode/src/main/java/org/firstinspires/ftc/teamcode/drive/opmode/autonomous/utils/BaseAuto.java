@@ -71,7 +71,21 @@ public abstract class BaseAuto extends LinearOpMode {
 
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
 
-            grabber.setPosition(0.3);
+            grabber.setPosition(0.64);
+        }
+        public class ResetEncoder implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                lift.setDirection(DcMotor.Direction.FORWARD);
+                lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                lift.setTargetPosition(0);
+                lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                return false;
+            }
+        }
+        public Action resetEncoder() {
+            return new ResetEncoder();
         }
         public class CloseClaw implements Action {
             @Override

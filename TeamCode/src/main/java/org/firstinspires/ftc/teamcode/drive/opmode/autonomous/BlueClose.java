@@ -3,6 +3,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -28,20 +29,43 @@ public class BlueClose extends BaseAuto {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         SideArm sideArm = new SideArm(hardwareMap);
 
-        TrajectoryActionBuilder path1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(20, 80), Math.PI / 2)
-                .waitSeconds(1);
+        TrajectoryActionBuilder toRung = drive.actionBuilder(initialPose)
+                .strafeTo(new Vector2d(-11.8, 32));
 
-        Action park = path1.fresh()
-                .strafeTo(new Vector2d(30, 80))
-                .build();
+        Action toRungAction = toRung.build();
+
+        TrajectoryActionBuilder afterRung = toRung.fresh()
+                .lineToY(50)
+                .setTangent(0)
+                .lineToX(-34)
+                .strafeTo(new Vector2d(-34, 10))
+                .strafeTo(new Vector2d(-45.5, 10))
+                .strafeTo(new Vector2d(-45.5, 57))
+                .strafeTo(new Vector2d(-45.5, 10))
+                .strafeTo(new Vector2d(-57, 10))
+                .strafeTo(new Vector2d(-57, 57))
+                .strafeTo(new Vector2d(-57, 10))
+                .strafeTo(new Vector2d(-61, 10))
+                .strafeTo(new Vector2d(-61, 57))
+                .strafeTo(new Vector2d(-34, 10))
+                .strafeTo(new Vector2d(-15, 10));
+
+        Action afterRungAction = afterRung.build();
+
+
+
+
 
         // actions that need to happen on init; for instance, a claw tightening.
         // Actions.runBlocking(claw.closeClaw());
 
 
+
+
         while (!isStopRequested() && !opModeIsActive()) {
             // in between initialization and match start
+            sideArm.closeClaw();
+            sideArm.resetEncoder();
         }
 
         waitForStart();
@@ -50,11 +74,23 @@ public class BlueClose extends BaseAuto {
 
         // start autonomous path
 
+//        Actions.runBlocking(
+//                new SequentialAction(
+//                        new ParallelAction(
+//                                sideArm.moveTo(1000, 0.6),
+//                                toRungAction
+//                        ),
+//                        sideArm.moveTo(800, 0.6),
+//                        sideArm.openClaw(),
+//                        afterRungAction
+//                )
+//        );
         Actions.runBlocking(
                 new SequentialAction(
-                        sideArm.moveTo(1000, 0.6),
-                        sideArm.openClaw(),
-                        sideArm.closeClaw()
+                        new ParallelAction(
+                                sideArm.moveTo(1000, 0.6),
+                                toRungAction
+                        )
                 )
         );
 
