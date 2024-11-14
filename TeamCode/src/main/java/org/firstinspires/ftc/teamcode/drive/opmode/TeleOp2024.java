@@ -184,7 +184,7 @@ public class TeleOp2024 extends LinearOpMode {
 
           if(armGamepad.dpad_up){
               specimenUp();
-          } else if(gamepad2.dpad_down){
+          } else if(armGamepad.dpad_down){
               specimenDown();
           } else{
               specimen.setPower(0);
