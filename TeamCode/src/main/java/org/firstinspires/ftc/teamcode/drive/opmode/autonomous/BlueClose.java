@@ -32,7 +32,8 @@ public class BlueClose extends BaseAuto {
         SideArm sideArm = new SideArm(hardwareMap);
 
         TrajectoryActionBuilder toRung = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(-11.8, 32));
+                .strafeTo(new Vector2d(-11.8, 36))
+                .turnTo(0);
 
         Action toRungAction = toRung.build();
 
@@ -54,9 +55,15 @@ public class BlueClose extends BaseAuto {
 
         Action afterRungAction = afterRung.build();
 
-        sideArm.closeClaw();
-        sideArm.resetEncoder();
+        TrajectoryActionBuilder wait = drive.actionBuilder(initialPose)
+                .waitSeconds(10);
 
+        Action waitAction = wait.build();
+
+        Actions.runBlocking(new SequentialAction(
+                sideArm.closeClaw(),
+                sideArm.resetEncoder()
+        ));
 
 
         // actions that need to happen on init; for instance, a claw tightening.
@@ -89,7 +96,11 @@ public class BlueClose extends BaseAuto {
         //1400
         Actions.runBlocking(
                 new SequentialAction(
-                                sideArm.moveTo(2400, 0.6)
+                                sideArm.moveTo(2400, 0.6),
+                                toRungAction,
+                        waitAction
+
+
                 )
         );
 

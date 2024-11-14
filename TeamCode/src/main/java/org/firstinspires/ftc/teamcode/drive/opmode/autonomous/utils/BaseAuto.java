@@ -64,21 +64,20 @@ public abstract class BaseAuto extends LinearOpMode {
 
         public SideArm(HardwareMap hardwareMap) {
             lift = hardwareMap.get(DcMotorEx.class, "specimen");
-            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lift.setDirection(DcMotor.Direction.FORWARD);
             lift.setTargetPosition(0);
             lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
-            this.closeClaw();
         }
         public class ResetEncoder implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 lift.setDirection(DcMotor.Direction.FORWARD);
                 lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 lift.setTargetPosition(0);
                 lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 return false;
             }
         }
@@ -126,7 +125,7 @@ public abstract class BaseAuto extends LinearOpMode {
                 double pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
 
-                if (Math.abs(targetPos - pos) < 30) {
+                if (Math.abs(targetPos - pos) > 30) {
                     return false;
                 } else {
                     lift.setPower(0);
