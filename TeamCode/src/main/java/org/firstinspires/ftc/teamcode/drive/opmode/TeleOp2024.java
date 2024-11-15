@@ -78,10 +78,10 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void claw2Open(){
-        clawSpecimen.setPosition(.3);
+        clawSpecimen.setPosition(.4);
     }
     public void claw2Close(){
-        clawSpecimen.setPosition(.64);
+        clawSpecimen.setPosition(.54);
     }
 
     public void rotateClawR() {
