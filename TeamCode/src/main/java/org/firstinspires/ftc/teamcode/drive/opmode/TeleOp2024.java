@@ -124,7 +124,7 @@ public class TeleOp2024 extends LinearOpMode {
 
         specimen = hardwareMap.get(DcMotor.class, "specimen");
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+      
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
         clawSpecimen = hardwareMap.get(Servo.class, "clawSpecimen");
