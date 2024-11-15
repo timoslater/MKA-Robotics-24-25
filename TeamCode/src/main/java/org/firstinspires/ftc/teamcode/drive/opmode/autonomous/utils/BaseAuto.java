@@ -65,7 +65,6 @@ public abstract class BaseAuto extends LinearOpMode {
         public SideArm(HardwareMap hardwareMap) {
             lift = hardwareMap.get(DcMotorEx.class, "specimen");
             lift.setDirection(DcMotor.Direction.FORWARD);
-            lift.setTargetPosition(0);
             lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
@@ -107,9 +106,9 @@ public abstract class BaseAuto extends LinearOpMode {
         }
 
         public class MoveTo implements Action {
-            int targetPos;
-            double power;
-            boolean initialized = false;
+            private int targetPos;
+            private double power;
+            private boolean initialized = false;
             public MoveTo(int targetPos, double power) {
                 this.targetPos = targetPos;
                 this.power = power;
@@ -118,17 +117,17 @@ public abstract class BaseAuto extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    lift.setPower(power);
+                    lift.setPower(targetPos > lift.getCurrentPosition() ? power : -power);
                     initialized = true;
                 }
 
-                double pos = lift.getCurrentPosition();
+                int pos = lift.getCurrentPosition();
                 packet.put("liftPos", pos);
 
-                if (Math.abs(targetPos - pos) > 30) {
+                if (Math.abs(targetPos - pos) < 50) {
+                    lift.setPower(0);
                     return false;
                 } else {
-                    lift.setPower(0);
                     return true;
                 }
             }

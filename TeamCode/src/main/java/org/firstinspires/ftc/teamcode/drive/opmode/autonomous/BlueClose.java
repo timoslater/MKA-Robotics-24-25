@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Vector;
 
 @Config
-//@Autonomous(name = "Blue Close", group = "Autonomous")
+@Autonomous(name = "Blue Close", group = "Autonomous")
 public class BlueClose extends BaseAuto {
     @Override
     public void runOpMode() {
@@ -38,8 +38,8 @@ public class BlueClose extends BaseAuto {
 
         Action toRung1Action = toRung1.build();
 
-        TrajectoryActionBuilder toRung2 = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(-11.8, 32))
+        TrajectoryActionBuilder toRung2 = toRung1.fresh()
+                .strafeTo(new Vector2d(-11.8, 30))
                 .turnTo(0);
 
         Action toRung2Action = toRung2.build();
@@ -47,21 +47,21 @@ public class BlueClose extends BaseAuto {
         TrajectoryActionBuilder afterRung = toRung2.fresh()
                 .strafeTo(new Vector2d(-11.8, 50))
                 .setTangent(0)
-                .strafeTo(new Vector2d(-34, 50))
-                .strafeTo(new Vector2d(-34, 10))
-                .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-45.5, 57))
-                .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-60, 10))
-                .strafeTo(new Vector2d(-60, 57))
-                .strafeTo(new Vector2d(-60, 10))
-                .strafeTo(new Vector2d(-65, 10))
-                .strafeTo(new Vector2d(-65, 57));
+                .strafeTo(new Vector2d(-38.5, 50))
+                .strafeTo(new Vector2d(-38.5, 10))
+                .strafeTo(new Vector2d(-50, 10))
+                .strafeTo(new Vector2d(-50, 57))
+                .strafeTo(new Vector2d(-50, 10))
+                .strafeTo(new Vector2d(-61.5, 10))
+                .strafeTo(new Vector2d(-61.5, 57))
+                .strafeTo(new Vector2d(-61.5, 10))
+                .strafeTo(new Vector2d(-65.25, 10))
+                .strafeTo(new Vector2d(-65.25, 57));
 
         Action afterRungAction = afterRung.build();
 
         TrajectoryActionBuilder wait = drive.actionBuilder(initialPose)
-                .waitSeconds(10);
+                .waitSeconds(1);
 
         Action waitAction = wait.build();
 
@@ -102,19 +102,18 @@ public class BlueClose extends BaseAuto {
         Actions.runBlocking(
                 new SequentialAction(
                         new ParallelAction(
-                                sideArm.moveTo(2400, 0.6),
+                                sideArm.moveTo(2400, 1),
                                 toRung1Action
                         ),
                         //waitAction,
                         toRung2Action,
-                        sideArm.moveTo(1400, 0.8),
+                        sideArm.moveTo(1400, 1),
                         sideArm.openClaw(),
                         //waitAction,
                         new ParallelAction(
                                 afterRungAction,
                                 sideArm.moveTo(0, 1)
-                        ),
-                        waitAction
+                        )
                 )
         );
 

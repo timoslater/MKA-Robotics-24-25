@@ -16,17 +16,17 @@ public class BlueCloseTest {
                 .build();
         // CHANGE TRACK WIDTH TO MATCH
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 32, 0))
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 30, 0))
                 .strafeTo(new Vector2d(-11.8, 50))
                 .setTangent(0)
-                .strafeTo(new Vector2d(-34, 50))
-                .strafeTo(new Vector2d(-34, 10))
-                .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-45.5, 57))
-                .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-60, 10))
-                .strafeTo(new Vector2d(-60, 57))
-                .strafeTo(new Vector2d(-60, 10))
+                .strafeTo(new Vector2d(-37.5, 50))
+                .strafeTo(new Vector2d(-37.5, 10))
+                .strafeTo(new Vector2d(-48.5, 10))
+                .strafeTo(new Vector2d(-48.5, 57))
+                .strafeTo(new Vector2d(-48.5, 10))
+                .strafeTo(new Vector2d(-62, 10))
+                .strafeTo(new Vector2d(-62, 57))
+                .strafeTo(new Vector2d(-62, 10))
                 .strafeTo(new Vector2d(-65, 10))
                 .strafeTo(new Vector2d(-65, 57))
                         .build());
