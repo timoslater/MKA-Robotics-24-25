@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
 
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 @TeleOp(name = "MAIN", group = "Linear Opmode")
@@ -25,6 +29,7 @@ public class TeleOp2024 extends LinearOpMode {
     private boolean resetting = false;
     private Gamepad driveGamepad = null;
     private Gamepad armGamepad = null;
+    private IMU imu;
 
     public void movement() {
         double modifier = 1;//nearBoard ? 0.65 : 1;
@@ -57,10 +62,7 @@ public class TeleOp2024 extends LinearOpMode {
     public void slideUp() {
         slide.setPower(0.75);
     }
-    public void slideDown() {
-        slide.setPower(-0.75
-        );
-    }
+    public void slideDown() { slide.setPower(-0.75); }
 
     public void specimenUp(){
         specimen.setPower(0.75);
@@ -122,20 +124,17 @@ public class TeleOp2024 extends LinearOpMode {
 
         specimen = hardwareMap.get(DcMotor.class, "specimen");
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+      
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
         clawSpecimen = hardwareMap.get(Servo.class, "clawSpecimen");
 
+
+
         driveGamepad = gamepad1;
 
 
-
-
-
         waitForStart();
-
-
 
 
         // run until the end of the match (driver presses STOP)
@@ -177,28 +176,28 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (armGamepad.cross) {
               clawClose();
           }
-          if (gamepad2.dpad_right){
+          if (armGamepad.dpad_right){
               rotateClawR();
-          } else if(gamepad2.dpad_left){
+          } else if(armGamepad.dpad_left){
               rotateClawL();
           }
 
-          if(gamepad2.dpad_up){
+          if(armGamepad.dpad_up){
               specimenUp();
-          } else if(gamepad2.dpad_down){
+          } else if(armGamepad.dpad_down){
               specimenDown();
           } else{
               specimen.setPower(0);
           }
 
-          if(gamepad2.square){
+          if(armGamepad.square){
               claw2Open();
           } else if(gamepad2.circle){
               claw2Close();
           }
 
 
-          telemetry.addData("Position", lift.getCurrentPosition());
+          telemetry.addData("Lift Position", lift.getCurrentPosition());
           telemetry.update();
         }
     }
