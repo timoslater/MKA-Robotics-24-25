@@ -16,21 +16,19 @@ public class BlueCloseTest {
                 .build();
         // CHANGE TRACK WIDTH TO MATCH
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 61.7, 0))
-                .strafeTo(new Vector2d(-11.8, 32))
-                        .setTangent(0)
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 32, 0))
+                .strafeTo(new Vector2d(-11.8, 50))
+                .setTangent(0)
                 .strafeTo(new Vector2d(-34, 50))
                 .strafeTo(new Vector2d(-34, 10))
                 .strafeTo(new Vector2d(-45.5, 10))
                 .strafeTo(new Vector2d(-45.5, 57))
                 .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-57, 10))
-                .strafeTo(new Vector2d(-57, 57))
-                .strafeTo(new Vector2d(-57, 10))
-                .strafeTo(new Vector2d(-61, 10))
-                .strafeTo(new Vector2d(-61, 57))
-                .strafeTo(new Vector2d(-34, 10))
-                .strafeTo(new Vector2d(-15, 10))
+                .strafeTo(new Vector2d(-60, 10))
+                .strafeTo(new Vector2d(-60, 57))
+                .strafeTo(new Vector2d(-60, 10))
+                .strafeTo(new Vector2d(-65, 10))
+                .strafeTo(new Vector2d(-65, 57))
                         .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

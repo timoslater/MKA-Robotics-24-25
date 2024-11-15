@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -31,13 +32,19 @@ public class BlueClose extends BaseAuto {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         SideArm sideArm = new SideArm(hardwareMap);
 
-        TrajectoryActionBuilder toRung = drive.actionBuilder(initialPose)
+        TrajectoryActionBuilder toRung1 = drive.actionBuilder(initialPose)
                 .strafeTo(new Vector2d(-11.8, 36))
                 .turnTo(0);
 
-        Action toRungAction = toRung.build();
+        Action toRung1Action = toRung1.build();
 
-        TrajectoryActionBuilder afterRung = toRung.fresh()
+        TrajectoryActionBuilder toRung2 = drive.actionBuilder(initialPose)
+                .strafeTo(new Vector2d(-11.8, 32))
+                .turnTo(0);
+
+        Action toRung2Action = toRung2.build();
+
+        TrajectoryActionBuilder afterRung = toRung2.fresh()
                 .strafeTo(new Vector2d(-11.8, 50))
                 .setTangent(0)
                 .strafeTo(new Vector2d(-34, 50))
@@ -45,13 +52,11 @@ public class BlueClose extends BaseAuto {
                 .strafeTo(new Vector2d(-45.5, 10))
                 .strafeTo(new Vector2d(-45.5, 57))
                 .strafeTo(new Vector2d(-45.5, 10))
-                .strafeTo(new Vector2d(-57, 10))
-                .strafeTo(new Vector2d(-57, 57))
-                .strafeTo(new Vector2d(-57, 10))
-                .strafeTo(new Vector2d(-61, 10))
-                .strafeTo(new Vector2d(-61, 57))
-                .strafeTo(new Vector2d(-34, 10))
-                .strafeTo(new Vector2d(-15, 10));
+                .strafeTo(new Vector2d(-60, 10))
+                .strafeTo(new Vector2d(-60, 57))
+                .strafeTo(new Vector2d(-60, 10))
+                .strafeTo(new Vector2d(-65, 10))
+                .strafeTo(new Vector2d(-65, 57));
 
         Action afterRungAction = afterRung.build();
 
@@ -96,11 +101,20 @@ public class BlueClose extends BaseAuto {
         //1400
         Actions.runBlocking(
                 new SequentialAction(
+                        new ParallelAction(
                                 sideArm.moveTo(2400, 0.6),
-                                toRungAction,
+                                toRung1Action
+                        ),
+                        //waitAction,
+                        toRung2Action,
+                        sideArm.moveTo(1400, 0.8),
+                        sideArm.openClaw(),
+                        //waitAction,
+                        new ParallelAction(
+                                afterRungAction,
+                                sideArm.moveTo(0, 1)
+                        ),
                         waitAction
-
-
                 )
         );
 
