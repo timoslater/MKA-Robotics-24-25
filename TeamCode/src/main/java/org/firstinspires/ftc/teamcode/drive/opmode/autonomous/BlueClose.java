@@ -24,7 +24,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Vector;
 
 @Config
-@Autonomous(name = "Blue Close", group = "Autonomous")
+//@Autonomous(name = "Blue Close", group = "Autonomous")
 public class BlueClose extends BaseAuto {
     @Override
     public void runOpMode() {
