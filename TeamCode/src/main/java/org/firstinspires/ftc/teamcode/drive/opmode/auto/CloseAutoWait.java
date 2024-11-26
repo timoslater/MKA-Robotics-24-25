@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode.autonomous;
+package org.firstinspires.ftc.teamcode.drive.opmode.auto;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
@@ -10,11 +10,11 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.drive.opmode.autonomous.utils.BaseAuto;
+import org.firstinspires.ftc.teamcode.drive.opmode.auto.utils.BaseAuto;
 
 @Config
-@Autonomous(name = "Close Auto (Right)", group = "Autonomous")
-public class CloseAuto extends BaseAuto {
+@Autonomous(name = "Close Auto (Right) + Wait", group = "Autonomous")
+public class CloseAutoWait extends BaseAuto {
     @Override
     public void runOpMode() {
         Pose2d initialPose = new Pose2d(-11.8, 61.7, 0);
