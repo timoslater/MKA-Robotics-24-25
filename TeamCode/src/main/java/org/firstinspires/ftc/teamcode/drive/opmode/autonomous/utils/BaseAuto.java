@@ -11,52 +11,61 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.autonomous.BlueClose;
-
 public abstract class BaseAuto extends LinearOpMode {
-    /*
     public class MainArm {
         private DcMotorEx lift;
         private DcMotorEx slide;
 
         public MainArm(HardwareMap hardwareMap) {
             lift = hardwareMap.get(DcMotorEx.class, "lift");
-            slide = hardwareMap.get(DcMotorEx.class, "slide");
-
+            lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            lift.setDirection(DcMotor.Direction.FORWARD);
-
-            slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            slide.setDirection(DcMotor.Direction.REVERSE);
         }
-
-        public class ArmDown implements Action {
-            private boolean initialized = false;
-
+        public class ResetEncoder implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                // placeholder for motor movement code
+                lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 return false;
             }
         }
-        public Action armDown() {
-            return new ArmDown();
+
+        public Action resetEncoder() {
+            return new ResetEncoder();
         }
 
-        public class ArmUp implements Action {
+        public class MoveTo implements Action {
+            private int targetPos;
+            private double power;
             private boolean initialized = false;
+            public MoveTo(int targetPos, double power) {
+                this.targetPos = targetPos;
+                this.power = power;
+            }
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                // placeholder for motor movement code
-                return false;
+                if (!initialized) {
+                    lift.setPower(targetPos > lift.getCurrentPosition() ? power : -power);
+                    initialized = true;
+                }
+
+                int pos = lift.getCurrentPosition();
+                packet.put("liftPos", pos);
+
+                if (Math.abs(targetPos - pos) < 50) {
+                    lift.setPower(0);
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
-        public Action armUp(){
-            return new ArmUp();
+        public Action moveTo(int targetPos, double power) {
+            return new MoveTo(targetPos, power);
         }
     }
-    */
 
     public class SideArm {
         private DcMotorEx lift;
@@ -67,15 +76,16 @@ public abstract class BaseAuto extends LinearOpMode {
             lift.setDirection(DcMotor.Direction.FORWARD);
             lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lift.setDirection(DcMotorSimple.Direction.REVERSE);
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
         }
         public class ResetEncoder implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                lift.setDirection(DcMotor.Direction.FORWARD);
                 lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 lift.setTargetPosition(0);
                 lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                lift.setDirection(DcMotorSimple.Direction.REVERSE);
                 lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 return false;
             }

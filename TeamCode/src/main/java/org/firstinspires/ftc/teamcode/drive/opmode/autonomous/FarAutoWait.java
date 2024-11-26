@@ -1,81 +1,64 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.autonomous;
-import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.drive.opmode.autonomous.utils.BaseAuto;
 
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
-import java.util.Vector;
-
 @Config
-@Autonomous(name = "Blue Close", group = "Autonomous")
-public class BlueClose extends BaseAuto {
+@Autonomous(name = "Far Auto (Left) + Wait", group = "Autonomous")
+public class FarAutoWait extends BaseAuto {
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(-11.8, 61.7, 0);
+        Pose2d initialPose = new Pose2d(35.8, 61.7, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         SideArm sideArm = new SideArm(hardwareMap);
+        MainArm mainArm = new MainArm(hardwareMap);
+
 
         TrajectoryActionBuilder toRung1 = drive.actionBuilder(initialPose)
-                .strafeTo(new Vector2d(-11.8, 36))
+                .strafeTo(new Vector2d(12, 36))
                 .turnTo(0);
 
         Action toRung1Action = toRung1.build();
 
         TrajectoryActionBuilder toRung2 = toRung1.fresh()
-                .strafeTo(new Vector2d(-11.8, 30))
+                .strafeTo(new Vector2d(12, 30))
                 .turnTo(0);
 
         Action toRung2Action = toRung2.build();
 
-        TrajectoryActionBuilder afterRung = toRung2.fresh()
-                .strafeTo(new Vector2d(-11.8, 50))
-                .setTangent(0)
-                .strafeTo(new Vector2d(-38.5, 50))
-                .strafeTo(new Vector2d(-38.5, 10))
-                .strafeTo(new Vector2d(-50, 10))
-                .strafeTo(new Vector2d(-50, 57))
-                .strafeTo(new Vector2d(-50, 10))
-                .strafeTo(new Vector2d(-61.5, 10))
-                .strafeTo(new Vector2d(-61.5, 57))
-                .strafeTo(new Vector2d(-61.5, 10))
-                .strafeTo(new Vector2d(-65.25, 10))
-                .strafeTo(new Vector2d(-65.25, 57));
+        TrajectoryActionBuilder afterRung1 = toRung2.fresh()
+                .strafeTo(new Vector2d(12, 36))
+                .strafeTo(new Vector2d(40, 36))//6200
+                .turnTo(Math.PI)
+                .strafeTo(new Vector2d(40, 10))
+                .strafeTo(new Vector2d(28, 10));
 
-        Action afterRungAction = afterRung.build();
+        Action afterRung1Action = afterRung1.build();
+
+        TrajectoryActionBuilder afterRung2 = afterRung1.fresh()
+                .strafeTo(new Vector2d(28, 10));
+
+        Action afterRung2Action = afterRung2.build();
 
         TrajectoryActionBuilder wait = drive.actionBuilder(initialPose)
-                .waitSeconds(1);
+                .waitSeconds(6);
 
         Action waitAction = wait.build();
 
         Actions.runBlocking(new SequentialAction(
                 sideArm.closeClaw(),
-                sideArm.resetEncoder()
+                sideArm.resetEncoder(),
+                mainArm.resetEncoder()
         ));
-
-
-        // actions that need to happen on init; for instance, a claw tightening.
-        // Actions.runBlocking(claw.closeClaw());
-
-
-
 
         while (!isStopRequested() && !opModeIsActive()) {
             // in between initialization and match start
@@ -101,6 +84,7 @@ public class BlueClose extends BaseAuto {
         //1400
         Actions.runBlocking(
                 new SequentialAction(
+                        waitAction,
                         new ParallelAction(
                                 sideArm.moveTo(2400, 1),
                                 toRung1Action
@@ -111,9 +95,12 @@ public class BlueClose extends BaseAuto {
                         sideArm.openClaw(),
                         //waitAction,
                         new ParallelAction(
-                                afterRungAction,
-                                sideArm.moveTo(0, 1)
+                                afterRung1Action,
+                                sideArm.moveTo(0, 1),
+                                mainArm.moveTo(3075, 0.5)
                         )
+
+                        //afterRung2Action
                 )
         );
 
