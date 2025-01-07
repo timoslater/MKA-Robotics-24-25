@@ -5,6 +5,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -21,6 +22,7 @@ public class TeleOp2024 extends LinearOpMode {
     //private DcMotor revArm = null;
     private DcMotor rightRear = null;
     private DcMotor lift = null;
+    private DcMotor lift2 = null;
     private DcMotor slide = null;
     private DcMotor specimen = null;
     private Servo claw = null;
@@ -51,12 +53,14 @@ public class TeleOp2024 extends LinearOpMode {
         leftRear.setPower(v3);
         rightRear.setPower(v4);
     }
-
+    
     public void liftUp(double power) {
         lift.setPower(power);
+        lift2.setPower(power);
     }
     public void liftDown(double power) {
         lift.setPower(-power);
+        lift2.setPower(-power);
     }
 
     public void slideUp() {
@@ -65,10 +69,10 @@ public class TeleOp2024 extends LinearOpMode {
     public void slideDown() { slide.setPower(-0.75); }
 
     public void specimenUp(){
-        specimen.setPower(0.75);
+        specimen.setPower(-0.75);
     }
     public void specimenDown(){
-        specimen.setPower(-0.75);
+        specimen.setPower(0.75);
     }
 
     public void clawOpen() {
@@ -80,10 +84,10 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void claw2Open(){
-        clawSpecimen.setPosition(.4);
+        clawSpecimen.setPosition(.3);
     }
     public void claw2Close(){
-        clawSpecimen.setPosition(.54);
+        clawSpecimen.setPosition(.64);
     }
 
     public void rotateClawR() {
@@ -117,6 +121,11 @@ public class TeleOp2024 extends LinearOpMode {
         lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        lift2 = hardwareMap.get(DcMotor.class, "lift2");
+        lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         slide = hardwareMap.get(DcMotor.class, "slide");
         slide.setDirection(DcMotor.Direction.REVERSE);
@@ -151,6 +160,7 @@ public class TeleOp2024 extends LinearOpMode {
               liftDown(armGamepad.right_trigger);
           } else {
               lift.setPower(0);
+              lift2.setPower(0);
           }
 
           if (armGamepad.right_bumper) {
@@ -192,7 +202,7 @@ public class TeleOp2024 extends LinearOpMode {
 
           if(armGamepad.square){
               claw2Open();
-          } else if(gamepad2.circle){
+          } else if(armGamepad.circle){
               claw2Close();
           }
 
