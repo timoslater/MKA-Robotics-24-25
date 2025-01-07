@@ -40,6 +40,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.messages.DriveCommandMessage;
 import org.firstinspires.ftc.teamcode.messages.MecanumCommandMessage;
@@ -63,14 +65,14 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
 
         // drive model parameters
-        public double inPerTick = 0.003;
-        public double lateralInPerTick = 0.002;
-        public double trackWidthTicks = 5189.032806683519;
+        public double inPerTick = 0.002; //0.003;
+        public double lateralInPerTick = inPerTick; //0.002;
+        public double trackWidthTicks = 7663.973607625398;//5189.032806683519;
 
         // feedforward parameters (in tick units)
-        public double kS = 1.1902182441574074;
-        public double kV = 0.000410675426223360;
-        public double kA = 0.0002; // still needs tuning
+        public double kS = 0.8826892075919655;//1.1902182441574074;
+        public double kV = 0.000292029114128202;//.000410675426223360;
+        public double kA = 0.000035;//0.0002; // still needs tuning
 
         // path profile parameters (in inches)
         public double maxWheelVel = 50;
@@ -83,11 +85,11 @@ public final class MecanumDrive {
 
         // path controller gains
         public double axialGain = 6;
-        public double lateralGain = 7;
-        public double headingGain = 7.5; // shared with turn
+        public double lateralGain = 8.5;//7;
+        public double headingGain = 10;//7.5; // shared with turn
 
-        public double axialVelGain = 3.5;
-        public double lateralVelGain = 1.5;
+        public double axialVelGain = 1;//3.5;
+        public double lateralVelGain = 0;//1.5;
         public double headingVelGain = 0; // shared with turn
     }
 
@@ -240,8 +242,8 @@ public final class MecanumDrive {
 
         voltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-        localizer = new TwoDeadWheelLocalizer(hardwareMap, lazyImu.get(), PARAMS.inPerTick);
-
+        //localizer = new TwoDeadWheelLocalizer(hardwareMap, lazyImu.get(), PARAMS.inPerTick);
+        localizer = new PinpointComputerlLocalizer(hardwareMap);
         FlightRecorder.write("MECANUM_PARAMS", PARAMS);
     }
 
@@ -444,17 +446,34 @@ public final class MecanumDrive {
     }
 
     public PoseVelocity2d updatePoseEstimate() {
-        Twist2dDual<Time> twist = localizer.update();
-        pose = pose.plus(twist.value());
 
-        poseHistory.add(pose);
-        while (poseHistory.size() > 100) {
-            poseHistory.removeFirst();
+        if (localizer instanceof PinpointComputerlLocalizer) {
+            GoBildaPinpointDriver odo = ((PinpointComputerlLocalizer) localizer).odo;
+            odo.update();
+
+            Pose2D odoPose = odo.getPosition();
+            pose = new Pose2d(new Vector2d(odoPose.getX(DistanceUnit.INCH), odoPose.getY(DistanceUnit.INCH)), odoPose.getHeading(AngleUnit.RADIANS));
+
+            poseHistory.add(pose);
+            while (poseHistory.size() > 100) {
+                poseHistory.removeFirst();
+            }
+
+            Pose2D odoVelocity = odo.getVelocity();
+            return new PoseVelocity2d(new Vector2d(odoVelocity.getX(DistanceUnit.INCH), odoVelocity.getY(DistanceUnit.INCH)), odoVelocity.getHeading(AngleUnit.RADIANS));
+        } else {
+            Twist2dDual<Time> twist = localizer.update();
+            pose = pose.plus(twist.value());
+
+            poseHistory.add(pose);
+            while (poseHistory.size() > 100) {
+                poseHistory.removeFirst();
+            }
+
+            estimatedPoseWriter.write(new PoseMessage(pose));
+
+            return twist.velocity().value();
         }
-
-        estimatedPoseWriter.write(new PoseMessage(pose));
-
-        return twist.velocity().value();
     }
 
     private void drawPoseHistory(Canvas c) {

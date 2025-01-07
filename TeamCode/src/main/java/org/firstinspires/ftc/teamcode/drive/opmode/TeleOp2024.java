@@ -132,6 +132,7 @@ public class TeleOp2024 extends LinearOpMode {
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         specimen = hardwareMap.get(DcMotor.class, "specimen");
+        specimen.setDirection(DcMotorSimple.Direction.REVERSE);
         slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
       
         claw = hardwareMap.get(Servo.class, "grabber");
@@ -154,7 +155,7 @@ public class TeleOp2024 extends LinearOpMode {
           armGamepad = gamepad2.getGamepadId() == -1 ? gamepad1 : gamepad2;
 
 
-          if (armGamepad.left_trigger > 0) {
+          if (armGamepad.left_trigger > 0 && (lift.getCurrentPosition() < 5900  || resetting)) {
               liftUp(armGamepad.left_trigger);
           } else if (armGamepad.right_trigger > 0) {
               liftDown(armGamepad.right_trigger);
@@ -171,15 +172,15 @@ public class TeleOp2024 extends LinearOpMode {
               slide.setPower(0);
           }
 
-//          if (driveGamepad.options) {
-//              if (resetting) {
-//                  lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//                  lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//                  resetting = false;
-//              } else {
-//                  resetting = true;
-//              }
-//          }
+          if (driveGamepad.options && driveGamepad.share) {
+              if (resetting) {
+                  lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                  lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                  resetting = false;
+              } else {
+                  resetting = true;
+              }
+          }
 
           if (armGamepad.triangle) {
               clawOpen();
@@ -206,7 +207,7 @@ public class TeleOp2024 extends LinearOpMode {
               claw2Close();
           }
 
-
+          telemetry.addData("Is Resetting?", resetting);
           telemetry.addData("Lift Position", lift.getCurrentPosition());
           telemetry.update();
         }

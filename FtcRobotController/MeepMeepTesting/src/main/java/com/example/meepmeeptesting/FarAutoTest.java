@@ -6,7 +6,7 @@ import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
-public class BlueCloseTest {
+public class FarAutoTest {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
@@ -14,22 +14,25 @@ public class BlueCloseTest {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 17.5)
                 .build();
-        // CHANGE TRACK WIDTH TO MATCH
 
-        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 30, 0))
-                .strafeTo(new Vector2d(-11.8, 50))
-                .setTangent(0)
-                .strafeTo(new Vector2d(-37.5, 50))
-                .strafeTo(new Vector2d(-37.5, 10))
-                .strafeTo(new Vector2d(-48.5, 10))
-                .strafeTo(new Vector2d(-48.5, 57))
-                .strafeTo(new Vector2d(-48.5, 10))
-                .strafeTo(new Vector2d(-62, 10))
-                .strafeTo(new Vector2d(-62, 57))
-                .strafeTo(new Vector2d(-62, 10))
-                .strafeTo(new Vector2d(-65, 10))
-                .strafeTo(new Vector2d(-65, 57))
-                        .build());
+        myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(35.8, 61.7, Math.PI))
+                .strafeTo(new Vector2d(12, 36)) //toRung1
+                .strafeTo(new Vector2d(12, 30)) //toRung2
+                .waitSeconds(1.5)
+
+                //afterRung1
+                .strafeTo(new Vector2d(12, 36))
+                .strafeTo(new Vector2d(40, 36))//6200
+                .turnTo(Math.PI-0.001)
+                .strafeTo(new Vector2d(40, 10))
+                .strafeTo(new Vector2d(28, 10))
+
+                //afterRung2
+                //.strafeTo(new Vector2d(28, 10))
+
+
+                //extend slide
+                .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
                 .setDarkMode(true)
