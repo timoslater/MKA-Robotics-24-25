@@ -76,7 +76,7 @@ public abstract class BaseAuto extends LinearOpMode {
             lift.setDirection(DcMotor.Direction.FORWARD);
             lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            lift.setDirection(DcMotorSimple.Direction.REVERSE);
+            //lift.setDirection(DcMotorSimple.Direction.REVERSE);
             grabber = hardwareMap.get(Servo.class, "clawSpecimen");
         }
         public class ResetEncoder implements Action {

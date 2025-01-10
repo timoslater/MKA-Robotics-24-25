@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.drive.opmode.teleop;
 
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.drive.opmode.teleop.utils.AsyncArmActions;
 
 
 @TeleOp(name = "MAIN", group = "Linear Opmode")
@@ -21,7 +20,7 @@ public class TeleOp2024 extends LinearOpMode {
     private DcMotor leftRear = null;
     //private DcMotor revArm = null;
     private DcMotor rightRear = null;
-    private DcMotor lift = null;
+    private DcMotor lift1 = null;
     private DcMotor lift2 = null;
     private DcMotor slide = null;
     private DcMotor specimen = null;
@@ -32,6 +31,13 @@ public class TeleOp2024 extends LinearOpMode {
     private Gamepad driveGamepad = null;
     private Gamepad armGamepad = null;
     private IMU imu;
+    private Servo hand;
+    private Servo elbow;
+    private int lastPos;
+    private boolean isDropping = false;
+
+
+    public boolean liftRunning = false;
 
     public void movement() {
         double modifier = 1;//nearBoard ? 0.65 : 1;
@@ -55,18 +61,18 @@ public class TeleOp2024 extends LinearOpMode {
     }
     
     public void liftUp(double power) {
-        lift.setPower(power);
+        lift1.setPower(power);
         lift2.setPower(power);
     }
     public void liftDown(double power) {
-        lift.setPower(-power);
+        lift1.setPower(-power);
         lift2.setPower(-power);
     }
 
     public void slideUp() {
-        slide.setPower(0.75);
+        slide.setPower(1);
     }
-    public void slideDown() { slide.setPower(-0.75); }
+    public void slideDown() { slide.setPower(-1); }
 
     public void specimenUp(){
         specimen.setPower(-0.75);
@@ -77,10 +83,19 @@ public class TeleOp2024 extends LinearOpMode {
 
     public void clawOpen() {
         claw.setPosition(.3);
+        if (!isDropping) {
+            elbow.setPosition(0.296);
+            hand.setPosition(0.416);
+        }
+
     }
 
     public void clawClose() {
         claw.setPosition(.64);
+        if (!isDropping) {
+            elbow.setPosition(0.38);
+            hand.setPosition(0.5);
+        };
     }
 
     public void claw2Open(){
@@ -91,12 +106,26 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void rotateClawR() {
-        rotate.setPosition(rotate.getPosition()+.001);
+        rotate.setPosition(rotate.getPosition()+.01);
     }
     public void rotateClawL() {
-        rotate.setPosition(rotate.getPosition()-.001);
+        rotate.setPosition(rotate.getPosition()-.01);
     }
-    @Override
+
+    public void armPositionIdle() {
+        isDropping = false;
+        hand.setPosition(.416);
+        clawOpen();
+    }
+
+    public void armPositionDrop() {
+        isDropping = true;
+        hand.setPosition(1);
+        elbow.setPosition(0);
+    }
+
+
+     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized", "haggis");
 
@@ -116,10 +145,10 @@ public class TeleOp2024 extends LinearOpMode {
         leftRear.setDirection(DcMotor.Direction.FORWARD);
         rightRear.setDirection(DcMotor.Direction.REVERSE);
 
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lift1 = hardwareMap.get(DcMotor.class, "lift");
+        lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         lift2 = hardwareMap.get(DcMotor.class, "lift2");
         lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -138,6 +167,10 @@ public class TeleOp2024 extends LinearOpMode {
         claw = hardwareMap.get(Servo.class, "grabber");
         rotate = hardwareMap.get(Servo.class,"rotator");
         clawSpecimen = hardwareMap.get(Servo.class, "clawSpecimen");
+        elbow = hardwareMap.get(Servo.class, "elbow");
+        hand = hardwareMap.get(Servo.class, "hand");
+
+        //AsyncArmActions armControl = new AsyncArmActions(0.25, this);
 
 
 
@@ -149,22 +182,55 @@ public class TeleOp2024 extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+           //armControl.moveLiftTo(2400);
 
           movement();
 
           armGamepad = gamepad2.getGamepadId() == -1 ? gamepad1 : gamepad2;
 
+          if (!liftRunning) {
+              if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900  || resetting)) {
+                  liftUp(armGamepad.left_trigger*0.75);
+                  lastPos = lift1.getCurrentPosition();
+              } else if (armGamepad.right_trigger > 0) {
+                  if (lift1.getCurrentPosition() > 330 || resetting) {
 
-          if (armGamepad.left_trigger > 0 && (lift.getCurrentPosition() < 5900  || resetting)) {
-              liftUp(armGamepad.left_trigger);
-          } else if (armGamepad.right_trigger > 0) {
-              liftDown(armGamepad.right_trigger);
-          } else {
-              lift.setPower(0);
-              lift2.setPower(0);
+                      int ticksToLimit = Math.abs(lift1.getCurrentPosition() - 330);
+                      if (ticksToLimit < 200) {
+                          liftDown(armGamepad.right_trigger * (ticksToLimit - 200) / 200);
+                      } else {
+                          liftDown(armGamepad.right_trigger * 0.75);
+                      }
+                      lastPos = lift1.getCurrentPosition();
+                  } else {
+                      // lower elbow
+                  }
+              } else {
+                  int positionError = lastPos - lift1.getCurrentPosition();
+                  double kP = 0.25;
+
+                  if (Math.abs(positionError) > 25) {
+                      double correctionPower = kP * (positionError / 50.0) * (positionError > 0 ? 1 : -1);
+                      lift1.setPower(correctionPower);
+                      lift2.setPower(correctionPower);
+                  } else {
+                      lift1.setPower(0);
+                      lift2.setPower(0);
+                  }
+              }
           }
 
-          if (armGamepad.right_bumper) {
+
+
+          if (armGamepad.dpad_up) {
+              armPositionDrop();
+          }
+
+          if (armGamepad.dpad_down) {
+              armPositionIdle();
+          }
+
+          if (armGamepad.right_bumper && (slide.getCurrentPosition() > -2670  || resetting)) {
               slideUp();
           } else if (armGamepad.left_bumper) {
               slideDown();
@@ -174,8 +240,8 @@ public class TeleOp2024 extends LinearOpMode {
 
           if (driveGamepad.options && driveGamepad.share) {
               if (resetting) {
-                  lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                  lift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                  lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                  lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                   resetting = false;
               } else {
                   resetting = true;
@@ -193,9 +259,9 @@ public class TeleOp2024 extends LinearOpMode {
               rotateClawL();
           }
 
-          if(armGamepad.dpad_up){
+          if(armGamepad.right_stick_button){
               specimenUp();
-          } else if(armGamepad.dpad_down){
+          } else if(armGamepad.left_stick_button){
               specimenDown();
           } else{
               specimen.setPower(0);
@@ -208,7 +274,7 @@ public class TeleOp2024 extends LinearOpMode {
           }
 
           telemetry.addData("Is Resetting?", resetting);
-          telemetry.addData("Lift Position", lift.getCurrentPosition());
+          telemetry.addData("Lift Position", lift1.getCurrentPosition());
           telemetry.update();
         }
     }

@@ -16,25 +16,93 @@ public class CloseAutoTest {
                 .build();
 
         myBot.runAction(myBot.getDrive().actionBuilder(new Pose2d(-11.8, 61.7, 0))
+//                .strafeTo(new Vector2d(-11.8, 36)) //toRung1
+//
+//                .strafeTo(new Vector2d(-11.8, 30)) //toRung2
+//
+//                .waitSeconds(2)
+//
+//                //afterRung
+//                .strafeTo(new Vector2d(-11.8, 50))
+//                .setTangent(0)
+//                .strafeTo(new Vector2d(-38.5, 50))
+//                .strafeTo(new Vector2d(-38.5, 10))
+//                .strafeTo(new Vector2d(-50, 10))
+//                .strafeTo(new Vector2d(-50, 57))
+//                .strafeTo(new Vector2d(-50, 10))
+//
+//                .strafeTo(new Vector2d(-61.5, 10))
+//                .strafeTo(new Vector2d(-61.5, 33))
+//                .strafeTo(new Vector2d(-50, 57))
+//                .strafeTo(new Vector2d(-61.5, 10))
+//                .strafeTo(new Vector2d(-65.25, 10))
+//                .strafeTo(new Vector2d(-65.25, 33))
+//                .strafeTo(new Vector2d(-50, 57))
+                //.strafeTo(new Vector2d(-65.25, 57))
+
                 .strafeTo(new Vector2d(-11.8, 36)) //toRung1
 
                 .strafeTo(new Vector2d(-11.8, 30)) //toRung2
 
-                .waitSeconds(2)
+                .waitSeconds(0.5)
 
                 //afterRung
                 .strafeTo(new Vector2d(-11.8, 50))
                 .setTangent(0)
-                .strafeTo(new Vector2d(-38.5, 50))
-                .strafeTo(new Vector2d(-38.5, 10))
-                .strafeTo(new Vector2d(-50, 10))
+                        .setReversed(true)
+
+                .strafeToLinearHeading(new Vector2d(-50, 10), Math.PI)
+
+                //.strafeTo(new Vector2d(-50, 10))
+
+
                 .strafeTo(new Vector2d(-50, 57))
-                .strafeTo(new Vector2d(-50, 10))
-                .strafeTo(new Vector2d(-61.5, 10))
-                .strafeTo(new Vector2d(-61.5, 57))
-                .strafeTo(new Vector2d(-61.5, 10))
-                .strafeTo(new Vector2d(-65.25, 10))
-                .strafeTo(new Vector2d(-65.25, 57))
+
+
+                        .setReversed(false)
+                // pick up specimen 2
+                .strafeTo(new Vector2d(-50, 42))
+
+                .strafeToLinearHeading(new Vector2d(-20, 42), 0)
+
+                .strafeTo(new Vector2d(0, 30))
+                // drop specimen 2
+
+
+                .strafeTo(new Vector2d(-11.8, 50))
+                        .setReversed(true)
+                .strafeToLinearHeading(new Vector2d(-50, 10), Math.PI)
+                                .strafeTo(new Vector2d(-61.5, 10))
+                                .strafeTo(new Vector2d(-50, 57))
+                // pick up specimen 3
+                .setReversed(false)
+                .strafeTo(new Vector2d(-50, 42))
+                .strafeToLinearHeading(new Vector2d(-20, 42), 0)
+
+                .strafeTo(new Vector2d(5, 30))
+                // drop specimen 3
+
+                .strafeTo(new Vector2d(-50, 57)) // park
+
+//                .splineToLinearHeading(new Pose2d(0, 30,Math.PI), Math.PI)
+//                .strafeToLinearHeading(new Vector2d(-20, 42), 0)
+//                .strafeTo(new Vector2d(-11.8, 30))
+//                .strafeTo(new Vector2d(-50, 50))
+//
+//                .strafeTo(new Vector2d(-50, 10))
+//                .strafeTo(new Vector2d(-61.5, 10))
+//                .strafeTo(new Vector2d(-61.5, 33))
+//
+//                .strafeTo(new Vector2d(-50, 57))
+//                .strafeTo(new Vector2d(-50, 40)) // watiing for human
+//                .strafeTo(new Vector2d(-50, 57))
+//
+//                .strafeTo(new Vector2d(-11.8, 50))
+//                .strafeTo(new Vector2d(-11.8, 30))
+//
+//                .strafeTo(new Vector2d(-61.5, 10))
+//                .strafeTo(new Vector2d(-65.25, 10))
+//                .strafeTo(new Vector2d(-65.25, 57))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)

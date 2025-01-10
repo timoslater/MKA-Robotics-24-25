@@ -45,16 +45,18 @@ public class ServoTest extends LinearOpMode {
 
         test = hardwareMap.get(ServoImplEx.class, "testServo");
 
+
+
         waitForStart();
 
         double startPos = test.getPosition();
 
         while (!isStopRequested() && opModeIsActive()) {
             if (gamepad1.dpad_left) {
-                test.setPosition(0);
+                test.setPosition(test.getPosition()+.001);
             }
             else if (gamepad1.dpad_right && !running) {
-                test.setPosition(1);
+                test.setPosition(test.getPosition()-.001);
             }
 
             telemetry.addData("Servo Position", test.getPosition());
