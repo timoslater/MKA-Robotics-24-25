@@ -35,7 +35,8 @@ public class TeleOp2024 extends LinearOpMode {
     private Servo elbow;
     private int lastPos;
     private boolean isDropping = false;
-
+    private int rotateIndex;
+    private double[] rotatePositions = {.055,.222, .555,.888};
 
     public boolean liftRunning = false;
 
@@ -106,10 +107,21 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
     public void rotateClawR() {
-        rotate.setPosition(rotate.getPosition()+.01);
+
+        if(rotateIndex<rotatePositions.length-1) {
+            rotateIndex++;
+            rotate.setPosition(rotatePositions[rotateIndex]);
+        }
+
+
     }
+
     public void rotateClawL() {
-        rotate.setPosition(rotate.getPosition()-.01);
+        if(rotateIndex>0) {
+            rotateIndex--;
+            rotate.setPosition(rotatePositions[rotateIndex]);
+        }
+
     }
 
     public void armPositionIdle() {
@@ -171,8 +183,11 @@ public class TeleOp2024 extends LinearOpMode {
         hand = hardwareMap.get(Servo.class, "hand");
 
         //AsyncArmActions armControl = new AsyncArmActions(0.25, this);
+         Gamepad currDriveGamepad = new Gamepad();
+         Gamepad currArmGamepad = new Gamepad();
 
-
+         Gamepad prevDriveGamepad = new Gamepad();
+         Gamepad prevArmGamepad = new Gamepad();
 
         driveGamepad = gamepad1;
 
@@ -187,6 +202,12 @@ public class TeleOp2024 extends LinearOpMode {
           movement();
 
           armGamepad = gamepad2.getGamepadId() == -1 ? gamepad1 : gamepad2;
+
+          prevArmGamepad.copy(currArmGamepad);
+          prevDriveGamepad.copy(currDriveGamepad);
+
+          currArmGamepad.copy(armGamepad);
+          currDriveGamepad.copy(driveGamepad);
 
           if (!liftRunning) {
               if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900  || resetting)) {
@@ -253,9 +274,10 @@ public class TeleOp2024 extends LinearOpMode {
           } else if (armGamepad.cross) {
               clawClose();
           }
-          if (armGamepad.dpad_right){
+          if (currArmGamepad.dpad_right && !prevArmGamepad.dpad_right){
+
               rotateClawR();
-          } else if(armGamepad.dpad_left){
+          } else if(currArmGamepad.dpad_left && !prevArmGamepad.dpad_left){
               rotateClawL();
           }
 
@@ -275,6 +297,7 @@ public class TeleOp2024 extends LinearOpMode {
 
           telemetry.addData("Is Resetting?", resetting);
           telemetry.addData("Lift Position", lift1.getCurrentPosition());
+          telemetry.addData("rotate index", rotateIndex);
           telemetry.update();
         }
     }
