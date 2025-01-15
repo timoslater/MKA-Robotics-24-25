@@ -33,12 +33,15 @@ public class TeleOp2024 extends LinearOpMode {
     private IMU imu;
     private Servo hand;
     private Servo elbow;
-    private int lastPos;
+    private int lastPos = 325;
     private boolean isDropping = false;
     private int rotateIndex;
     private double[] rotatePositions = {.055,.222, .555,.888};
 
+
     public boolean liftRunning = false;
+
+    public boolean positionSet = false;
 
     public void movement() {
         double modifier = 1;//nearBoard ? 0.65 : 1;
@@ -115,7 +118,6 @@ public class TeleOp2024 extends LinearOpMode {
 
 
     }
-
     public void rotateClawL() {
         if(rotateIndex>0) {
             rotateIndex--;
@@ -126,19 +128,20 @@ public class TeleOp2024 extends LinearOpMode {
 
     public void armPositionIdle() {
         isDropping = false;
-        hand.setPosition(.416);
+        hand.setPosition(.92);
         clawOpen();
     }
 
-    public void armPositionDrop() {
+    public void armPositionDrop() throws InterruptedException {
         isDropping = true;
-        hand.setPosition(1);
         elbow.setPosition(0);
+        Thread.sleep(500);
+        hand.setPosition(0);
     }
 
 
      @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized", "haggis");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -199,6 +202,11 @@ public class TeleOp2024 extends LinearOpMode {
         while (opModeIsActive()) {
            //armControl.moveLiftTo(2400);
 
+            if (!positionSet && lift1.getCurrentPosition() > 250) {
+                positionSet = true;
+                armPositionIdle();
+            }
+
           movement();
 
           armGamepad = gamepad2.getGamepadId() == -1 ? gamepad1 : gamepad2;
@@ -210,35 +218,31 @@ public class TeleOp2024 extends LinearOpMode {
           currDriveGamepad.copy(driveGamepad);
 
           if (!liftRunning) {
-              if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900  || resetting)) {
-                  liftUp(armGamepad.left_trigger*0.75);
-                  lastPos = lift1.getCurrentPosition();
-              } else if (armGamepad.right_trigger > 0) {
-                  if (lift1.getCurrentPosition() > 330 || resetting) {
-
-                      int ticksToLimit = Math.abs(lift1.getCurrentPosition() - 330);
-                      if (ticksToLimit < 200) {
-                          liftDown(armGamepad.right_trigger * (ticksToLimit - 200) / 200);
+                  if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900 || resetting)) {
+                      liftUp(armGamepad.left_trigger * 0.75);
+                      lastPos = lift1.getCurrentPosition();
+                  } else if (armGamepad.right_trigger > 0 && (lift1.getCurrentPosition() > 230 || resetting)) {
+                      int ticksToLimit = Math.abs(lift1.getCurrentPosition() - 230);
+                      if (ticksToLimit < 300) {
+                          liftDown(armGamepad.right_trigger * (ticksToLimit - 300) / 300);
                       } else {
-                          liftDown(armGamepad.right_trigger * 0.75);
+                          liftDown(armGamepad.right_trigger * 0.5);
                       }
                       lastPos = lift1.getCurrentPosition();
                   } else {
-                      // lower elbow
-                  }
-              } else {
-                  int positionError = lastPos - lift1.getCurrentPosition();
-                  double kP = 0.25;
+                      int positionError = lastPos - lift1.getCurrentPosition();
+                      double correctionPower;
+                      double kP = 0.25;
 
-                  if (Math.abs(positionError) > 25) {
-                      double correctionPower = kP * (positionError / 50.0) * (positionError > 0 ? 1 : -1);
-                      lift1.setPower(correctionPower);
-                      lift2.setPower(correctionPower);
-                  } else {
-                      lift1.setPower(0);
-                      lift2.setPower(0);
+                      if (Math.abs(positionError) > 25) {
+                          correctionPower = kP * (positionError / 50.0) * (positionError > 0 ? 1 : -1);
+                          lift1.setPower(correctionPower);
+                          lift2.setPower(correctionPower);
+                      } else {
+                          lift1.setPower(0);
+                          lift2.setPower(0);
+                      }
                   }
-              }
           }
 
 
