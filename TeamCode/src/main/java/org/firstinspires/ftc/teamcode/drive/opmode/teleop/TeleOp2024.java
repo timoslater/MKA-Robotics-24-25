@@ -9,8 +9,6 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.drive.opmode.teleop.utils.AsyncArmActions;
-
 
 @TeleOp(name = "MAIN", group = "Linear Opmode")
 public class TeleOp2024 extends LinearOpMode {
@@ -40,8 +38,8 @@ public class TeleOp2024 extends LinearOpMode {
 
 
     public boolean liftRunning = false;
-
     public boolean positionSet = false;
+    private double minLiftPower = 0.25;
 
     public void movement() {
         double modifier = 1;//nearBoard ? 0.65 : 1;
@@ -217,34 +215,32 @@ public class TeleOp2024 extends LinearOpMode {
           currArmGamepad.copy(armGamepad);
           currDriveGamepad.copy(driveGamepad);
 
-          if (!liftRunning) {
-                  if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900 || resetting)) {
-                      liftUp(armGamepad.left_trigger * 0.75);
-                      lastPos = lift1.getCurrentPosition();
-                  } else if (armGamepad.right_trigger > 0 && (lift1.getCurrentPosition() > 230 || resetting)) {
-                      int ticksToLimit = Math.abs(lift1.getCurrentPosition() - 230);
-                      if (ticksToLimit < 300) {
-                          liftDown(armGamepad.right_trigger * (ticksToLimit - 300) / 300);
-                      } else {
-                          liftDown(armGamepad.right_trigger * 0.5);
-                      }
-                      lastPos = lift1.getCurrentPosition();
-                  } else {
-                      int positionError = lastPos - lift1.getCurrentPosition();
-                      double correctionPower;
-                      double kP = 0.25;
+        if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900 || resetting)) {
+            liftUp(armGamepad.left_trigger * 0.75);
+            lastPos = lift1.getCurrentPosition();
+        } else if (armGamepad.right_trigger > 0) { //&& (lift1.getCurrentPosition() > 230 || resetting)) {
+            if (lift1.getCurrentPosition() < 400) {
+                liftDown(armGamepad.right_trigger * 0.75 * Math.max(Math.pow(minLiftPower, Math.abs(lift1.getCurrentPosition() - 0)), minLiftPower));
+                // f(x) = (total power) * (min power)^(right_trigger)
+            } else {
+                liftDown(armGamepad.right_trigger * 0.75);
+            }
+//                  }
+            lastPos = lift1.getCurrentPosition();
+        } else {
+            int positionError = lastPos - lift1.getCurrentPosition();
+            double correctionPower;
+            double kP = 0.25;
 
-                      if (Math.abs(positionError) > 25) {
-                          correctionPower = kP * (positionError / 50.0) * (positionError > 0 ? 1 : -1);
-                          lift1.setPower(correctionPower);
-                          lift2.setPower(correctionPower);
-                      } else {
-                          lift1.setPower(0);
-                          lift2.setPower(0);
-                      }
-                  }
-          }
-
+            if (Math.abs(positionError) > 25) {
+                correctionPower = kP * (positionError / 50.0) * (positionError > 0 ? 1 : -1);
+                lift1.setPower(correctionPower);
+                lift2.setPower(correctionPower);
+            } else {
+                lift1.setPower(0);
+                lift2.setPower(0);
+            }
+        }
 
 
           if (armGamepad.dpad_up) {
