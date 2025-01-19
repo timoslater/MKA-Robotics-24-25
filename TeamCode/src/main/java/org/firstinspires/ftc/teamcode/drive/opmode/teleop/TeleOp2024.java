@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.drive.opmode.teleop;
 
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +12,9 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.drive.opmode.teleop.utils.PIDController;
 
+@Config
 @TeleOp(name = "MAIN", group = "Linear Opmode")
 public class TeleOp2024 extends LinearOpMode {
 
@@ -36,6 +41,11 @@ public class TeleOp2024 extends LinearOpMode {
     private int rotateIndex;
     private double[] rotatePositions = {.055,.222, .555,.888};
 
+    private PIDController controller;
+    public static double p = 0, i = 0, d = 0;
+    public static double f = 0;
+    public static int target = 0;
+    private final double ticks = 384.5;
 
     public boolean liftRunning = false;
     public boolean positionSet = false;
@@ -138,8 +148,9 @@ public class TeleOp2024 extends LinearOpMode {
     }
 
 
-     @Override
+    @Override
     public void runOpMode() throws InterruptedException {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         telemetry.addData("Status", "Initialized", "haggis");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -192,6 +203,8 @@ public class TeleOp2024 extends LinearOpMode {
 
         driveGamepad = gamepad1;
 
+        controller = new PIDController(p,i,d);
+
 
         waitForStart();
 
@@ -215,6 +228,17 @@ public class TeleOp2024 extends LinearOpMode {
           currArmGamepad.copy(armGamepad);
           currDriveGamepad.copy(driveGamepad);
 
+          controller.setPID(p,i,d);
+          int armPos = lift1.getCurrentPosition();
+          double pid = controller.calculate(armPos,target);
+          double ff = Math.cos(Math.toRadians(target/ticks)) *f;
+
+          double power = pid + ff;
+          lift1.setPower(power);
+          lift2.setPower(power);
+
+
+        /*
         if (armGamepad.left_trigger > 0 && (lift1.getCurrentPosition() < 5900 || resetting)) {
             liftUp(armGamepad.left_trigger * 0.75);
             lastPos = lift1.getCurrentPosition();
@@ -241,7 +265,7 @@ public class TeleOp2024 extends LinearOpMode {
                 lift2.setPower(0);
             }
         }
-
+        */
 
           if (armGamepad.dpad_up) {
               armPositionDrop();
@@ -296,7 +320,8 @@ public class TeleOp2024 extends LinearOpMode {
           }
 
           telemetry.addData("Is Resetting?", resetting);
-          telemetry.addData("Lift Position", lift1.getCurrentPosition());
+          telemetry.addData("Lift Position", armPos);
+          telemetry.addData("Target", target);
           telemetry.addData("rotate index", rotateIndex);
           telemetry.update();
         }
